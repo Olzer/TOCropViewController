@@ -15,6 +15,7 @@
 @property (nonatomic, strong) UIImageView *imageView;   // The image view to present the cropped image
 
 @property (nonatomic, assign) TOCropViewCroppingStyle croppingStyle; //The cropping style
+@property (nonatomic, assign) ToCropViewInterfaceStyle interfaceStyle
 @property (nonatomic, assign) CGRect croppedFrame;
 @property (nonatomic, assign) NSInteger angle;
 

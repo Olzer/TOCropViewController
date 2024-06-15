@@ -39,6 +39,7 @@ public typealias CropViewControllerToolbarPosition = TOCropViewControllerToolbar
  */
 public typealias CropViewCroppingStyle = TOCropViewCroppingStyle
 
+public typealias CropViewInterfaceStyle = ToCropViewInterfaceStyle
 // ------------------------------------------------
 /// @name Delegate
 // ------------------------------------------------
@@ -158,6 +159,13 @@ open class CropViewController: UIViewController, TOCropViewControllerDelegate {
      */
     public var croppingStyle: CropViewCroppingStyle {
         return toCropViewController.croppingStyle
+    }
+    
+    /**
+     The interface style
+     */
+    public var interfaceStyle: CropViewInterfaceStyle {
+        return toCropViewController.interfaceStyle
     }
     
     /**
@@ -284,7 +292,7 @@ open class CropViewController: UIViewController, TOCropViewControllerDelegate {
 
      Default is false.
      */
-    public var doneButtonHidden: Bool {
+    public var ttonHidden: Bool {
         set { toCropViewController.doneButtonHidden = newValue }
         get { return toCropViewController.doneButtonHidden }
     }
@@ -533,8 +541,8 @@ open class CropViewController: UIViewController, TOCropViewControllerDelegate {
      @param style The cropping style that will be used with this view controller (eg, rectangular, or circular)
      @param image The image that will be cropped
      */
-    public init(croppingStyle: CropViewCroppingStyle, image: UIImage) {
-        self.toCropViewController = TOCropViewController(croppingStyle: croppingStyle, image: image)
+    public init(croppingStyle: CropViewCroppingStyle, image: UIImage, interfaceStyle: CropViewInterfaceStyle) {
+        self.toCropViewController = TOCropViewController(croppingStyle: croppingStyle, image: image, interfaceStyle: interfaceStyle)
         super.init(nibName: nil, bundle: nil)
         setUpCropController()
     }
