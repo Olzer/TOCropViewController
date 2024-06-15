@@ -53,6 +53,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readonly) TOCropViewCroppingStyle croppingStyle;
 
 /**
+ The interface style
+ */
+@property (nonatomic, assign, readonly) ToCropViewInterfaceStyle interfaceStyle;
+
+/**
  A semi-transparent grey view, overlaid on top of the background image
  */
 @property (nonatomic, strong, readonly) UIView *overlayView;
@@ -215,8 +220,9 @@ The minimum croping aspect ratio. If set, user is prevented from setting croppin
 /**
  Create a new instance of the crop view with the specified image and cropping
  */
-- (nonnull instancetype)initWithCroppingStyle:(TOCropViewCroppingStyle)style image:(nonnull UIImage *)image;
-
+- (nonnull instancetype)initWithCroppingStyle:(TOCropViewCroppingStyle)style
+                                        image:(nonnull UIImage *)image
+                               interfaceStyle:(ToCropViewInterfaceStyle)interfaceStyle;
 /**
  Performs the initial set up, including laying out the image and applying any restore properties.
  This should be called once the crop view has been added to a parent that is in its final layout frame.

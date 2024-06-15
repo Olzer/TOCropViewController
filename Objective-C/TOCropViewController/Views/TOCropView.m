@@ -25,6 +25,7 @@
 #import "TOCropScrollView.h"
 
 #define TOCROPVIEW_BACKGROUND_COLOR [UIColor colorWithWhite:0.12f alpha:1.0f]
+#define TOCROPVIEW_BACKGROUND_COLOR_CUSTOM [UIColor colorWithWhite:0.95 alpha:1.0]
 
 static const CGFloat kTOCropViewPadding = 14.0f;
 static const NSTimeInterval kTOCropTimerDuration = 0.8f;
@@ -49,6 +50,7 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
 
 @property (nonatomic, strong, readwrite) UIImage *image;
 @property (nonatomic, assign, readwrite) TOCropViewCroppingStyle croppingStyle;
+@property (nonatomic, assign, readwrite) ToCropViewInterfaceStyle interfaceStyle;
 
 /* Views */
 @property (nonatomic, strong) UIImageView *backgroundImageView;     /* The main image view, placed within the scroll view */
@@ -114,14 +116,15 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
 
 - (instancetype)initWithImage:(UIImage *)image
 {
-    return [self initWithCroppingStyle:TOCropViewCroppingStyleDefault image:image];
+    return [self initWithCroppingStyle:TOCropViewCroppingStyleDefault image:image interfaceStyle:(ToCropViewInterfaceStyleCustom)];
 }
 
-- (instancetype)initWithCroppingStyle:(TOCropViewCroppingStyle)style image:(UIImage *)image
+- (instancetype) initWithCroppingStyle:(TOCropViewCroppingStyle)style image:(UIImage *)image interfaceStyle:(ToCropViewInterfaceStyle)interfaceStyle
 {
     if (self = [super init]) {
         _image = image;
         _croppingStyle = style;
+        _interfaceStyle = interfaceStyle;
         [self setup];
     }
     
@@ -134,9 +137,12 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
     
     BOOL circularMode = (self.croppingStyle == TOCropViewCroppingStyleCircular);
     
+    //Setup interface style
+    self.interfaceStyle == (self.interfaceStyle == ToCropViewInterfaceStyleCustom);
+    
     //View properties
     self.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-    self.backgroundColor = TOCROPVIEW_BACKGROUND_COLOR;
+    self.backgroundColor = self.interfaceStyle ? TOCROPVIEW_BACKGROUND_COLOR_CUSTOM : TOCROPVIEW_BACKGROUND_COLOR; // Set background color to white
     self.cropBoxFrame = CGRectZero;
     self.applyInitialCroppedImageFrame = NO;
     self.editing = NO;
@@ -184,7 +190,7 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
     self.overlayView = [[UIView alloc] initWithFrame:self.bounds];
     self.overlayView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.overlayView.backgroundColor = [self.backgroundColor colorWithAlphaComponent:0.35f];
-    self.overlayView.hidden = NO;
+    self.overlayView.hidden = self.interfaceStyle ? YES : NO;
     self.overlayView.userInteractionEnabled = NO;
     [self addSubview:self.overlayView];
     
@@ -200,7 +206,7 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
         self.translucencyView = toolbar;
         self.translucencyView.frame = CGRectInset(self.bounds, -1.0f, -1.0f);
     }
-    self.translucencyView.hidden = self.translucencyAlwaysHidden;
+    self.translucencyView.hidden = self.interfaceStyle ? YES : NO;
     self.translucencyView.userInteractionEnabled = NO;
     self.translucencyView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self addSubview:self.translucencyView];
@@ -215,7 +221,7 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
     self.foregroundImageView.layer.minificationFilter = kCAFilterTrilinear;
     [self.foregroundContainerView addSubview:self.foregroundImageView];
     
-    // Disable colour inversion for the image views
+    // Disable color inversion for the image views
     if (@available(iOS 11.0, *)) {
         self.foregroundImageView.accessibilityIgnoresInvertColors = YES;
         self.backgroundImageView.accessibilityIgnoresInvertColors = YES;
@@ -225,9 +231,9 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
     if (circularMode) { return; }
     
     // The white grid overlay view
-    self.gridOverlayView = [[TOCropOverlayView alloc] initWithFrame:self.foregroundContainerView.frame];
+    self.gridOverlayView = [[TOCropOverlayView alloc] initWithFrame:self.foregroundContainerView.frame interfaceStyle:self.interfaceStyle];
     self.gridOverlayView.userInteractionEnabled = NO;
-    self.gridOverlayView.gridHidden = YES;
+    self.gridOverlayView.gridHidden = self.interfaceStyle ? NO : YES;
     [self addSubview:self.gridOverlayView];
     
     // The pan controller to recognize gestures meant to resize the grid view
@@ -967,8 +973,7 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
     self.gridPanGestureRecognizer.enabled = _cropBoxResizeEnabled;
 }
 
-- (void)setCropBoxFrame:(CGRect)cropBoxFrame
-{
+- (void)setCropBoxFrame:(CGRect)cropBoxFrame {
     if (CGRectEqualToRect(cropBoxFrame, _cropBoxFrame)) {
         return;
     }
@@ -1005,9 +1010,13 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
     
     _cropBoxFrame = cropBoxFrame;
     
-    self.foregroundContainerView.frame = _cropBoxFrame; //set the clipping view to match the new rect
-    self.gridOverlayView.frame = _cropBoxFrame; //set the new overlay view to match the same region
-    
+    // Set the clipping view to match the new rect
+    self.foregroundContainerView.frame = _cropBoxFrame;
+
+    // Set the new overlay view to match the same region, but with 30 points spacing
+    CGRect gridOverlayFrame = _interfaceStyle ? CGRectInset(_cropBoxFrame, 30, 20) : _cropBoxFrame;
+    self.gridOverlayView.frame = gridOverlayFrame;
+
     // If the mask layer is present, adjust its transform to fit the new container view size
     if (self.croppingStyle == TOCropViewCroppingStyleCircular) {
         CGFloat halfWidth = self.foregroundContainerView.frame.size.width * 0.5f;
@@ -1251,7 +1260,7 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
     // Toggle the visiblity of the gridlines when not editing
     BOOL hidden = !_editing;
     if (self.alwaysShowCroppingGrid) { hidden = NO; } // Override this if the user requires
-    [self.gridOverlayView setGridHidden:hidden animated:animated];
+//    [self.gridOverlayView setGridHidden:hidden animated:animated];
     
     if (resetCropbox) {
         [self moveCroppedContentToCenterAnimated:animated];
@@ -1657,12 +1666,13 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
         } completion:^(BOOL complete) {
             self.backgroundContainerView.hidden = NO;
             self.foregroundContainerView.hidden = NO;
-            self.translucencyView.hidden = self.translucencyAlwaysHidden;
+            self.translucencyView.hidden = self.interfaceStyle ? YES : NO;
             self.gridOverlayView.hidden = NO;
             
             self.backgroundContainerView.alpha = 0.0f;
             self.gridOverlayView.alpha = 0.0f;
             
+            // WAS COMMENDED
             self.translucencyView.alpha = 1.0f;
             
             [UIView animateWithDuration:0.45f animations:^{
