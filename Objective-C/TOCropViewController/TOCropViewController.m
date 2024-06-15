@@ -38,6 +38,9 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
 /* The cropping style of the crop view */
 @property (nonatomic, assign, readwrite) TOCropViewCroppingStyle croppingStyle;
 
+/* The interface style */
+@property (nonatomic, assign, readwrite) ToCropViewInterfaceStyle interfaceStyle;
+
 /* Views */
 @property (nonatomic, strong) TOCropToolbar *toolbar;
 @property (nonatomic, strong, readwrite) TOCropView *cropView;
@@ -71,8 +74,9 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
 
 @implementation TOCropViewController
 
-- (instancetype)initWithCroppingStyle:(TOCropViewCroppingStyle)style image:(UIImage *)image
-{
+- (instancetype)initWithCroppingStyle:(TOCropViewCroppingStyle)style
+                                image:(UIImage *)image
+                      interfaceStyle:(ToCropViewInterfaceStyle)interfaceStyle {
     NSParameterAssert(image);
 
     self = [super initWithNibName:nil bundle:nil];
@@ -80,6 +84,7 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
         // Init parameters
         _image = image;
         _croppingStyle = style;
+        _interfaceStyle = interfaceStyle; // Initialize the new property
         
         // Set up base view controller behaviour
         self.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
@@ -104,28 +109,37 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
 
 - (instancetype)initWithImage:(UIImage *)image
 {
-    return [self initWithCroppingStyle:TOCropViewCroppingStyleDefault image:image];
+    return [self initWithCroppingStyle:TOCropViewCroppingStyleDefault image:image interfaceStyle:_interfaceStyle];
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-
-    // Set up view controller properties
+    
+    //Set up view controller properties
     self.transitioningDelegate = self;
     self.view.backgroundColor = self.cropView.backgroundColor;
     
     BOOL circularMode = (self.croppingStyle == TOCropViewCroppingStyleCircular);
-
-    // Layout the views initially
+    
+    //Chek if interface mode is cucstomInterfaceMode
+    self.interfaceStyle = (self.interfaceStyle == ToCropViewInterfaceStyleCustom);
+    
+    //Layout the views initially
     self.cropView.frame = [self frameForCropViewWithVerticalLayout:self.verticalLayout];
     self.toolbar.frame = [self frameForToolbarWithVerticalLayout:self.verticalLayout];
-
-    // Set up toolbar default behaviour
+    
+    //Set up toolbar default behaviour
     self.toolbar.clampButtonHidden = self.aspectRatioPickerButtonHidden || circularMode;
     self.toolbar.rotateClockwiseButtonHidden = self.rotateClockwiseButtonHidden;
     
-    // Set up the toolbar button actions
+    //Configure ui elements visibility while using custom interface mode
+    self.toolbar.rotateButton.hidden = self.interfaceStyle;
+    self.toolbar.resetButton.hidden = self.interfaceStyle;
+    self.toolbar.rotateClockwiseButton.hidden = self.interfaceStyle;
+    self.aspectRatioPickerButtonHidden = self.interfaceStyle;
+    
+    //Set up the toolbar button actions
     __weak typeof(self) weakSelf = self;
     self.toolbar.doneButtonTapped   = ^{ [weakSelf doneButtonTapped]; };
     self.toolbar.cancelButtonTapped = ^{ [weakSelf cancelButtonTapped]; };
@@ -1076,7 +1090,7 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
 }
 
 - (void)setCancelButtonColor:(UIColor *)color {
-    self.toolbar.cancelButtonColor = color;
+    self.toolbar.cancelButtonColor = [UIColor blackColor];
 }
 
 - (TOCropView *)cropView
@@ -1084,7 +1098,7 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
     // Lazily create the crop view in case we try and access it before presentation, but
     // don't add it until our parent view controller view has loaded at the right time
     if (!_cropView) {
-        _cropView = [[TOCropView alloc] initWithCroppingStyle:self.croppingStyle image:self.image];
+        _cropView = [[TOCropView alloc] initWithCroppingStyle:self.croppingStyle image:self.image interfaceStyle:self.interfaceStyle];
         _cropView.delegate = self;
         _cropView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         [self.view addSubview:_cropView];
@@ -1095,7 +1109,7 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
 - (TOCropToolbar *)toolbar
 {
     if (!_toolbar) {
-        _toolbar = [[TOCropToolbar alloc] initWithFrame:CGRectZero];
+        _toolbar =  [[TOCropToolbar alloc] initWithFrame:CGRectZero interfaceStyle:_interfaceStyle];
         [self.view addSubview:_toolbar];
     }
     return _toolbar;
