@@ -21,6 +21,7 @@
 //  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #import <UIKit/UIKit.h>
+#import "TOCropViewController.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -34,6 +35,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** Add/Remove the interior vertical grid lines. */
 @property (nonatomic, assign) BOOL displayVerticalGridLines;
+
+@property (nonatomic, assign, readonly) ToCropViewInterfaceStyle interfaceStyle;
+
+- (instancetype)initWithFrame:(CGRect)frame interfaceStyle:(ToCropViewInterfaceStyle)interfaceStyle;
 
 /** Shows and hides the interior grid lines with an optional crossfade animation. */
 - (void)setGridHidden:(BOOL)hidden animated:(BOOL)animated;
