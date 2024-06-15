@@ -92,6 +92,11 @@ NS_ASSUME_NONNULL_BEGIN
 /* Done button frame for popover controllers */
 @property (nonatomic, readonly) CGRect doneButtonFrame;
 
+@property (nonatomic, assign, readonly) ToCropViewInterfaceStyle interfaceStyle;
+
+- (instancetype)initWithFrame:(CGRect)frame interfaceStyle:(ToCropViewInterfaceStyle)interfaceStyle;
+- (void)applyStyleWithInterfaceStyle:(ToCropViewInterfaceStyle)interfaceStyle;
+
 @end
 
 NS_ASSUME_NONNULL_END
