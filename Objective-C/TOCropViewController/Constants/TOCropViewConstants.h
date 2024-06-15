@@ -23,6 +23,14 @@
 #import <Foundation/Foundation.h>
 
 /**
+ The interface styles
+ */
+typedef NS_ENUM(NSInteger, ToCropViewInterfaceStyle) {
+    ToCropViewInterfaceStyleDefault,
+    ToCropViewInterfaceStyleCustom
+};
+
+/**
  The shape of the cropping region of this crop view controller
  */
 typedef NS_ENUM(NSInteger, TOCropViewCroppingStyle) {
