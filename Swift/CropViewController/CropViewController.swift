@@ -39,6 +39,8 @@ public typealias CropViewControllerToolbarPosition = TOCropViewControllerToolbar
  */
 public typealias CropViewCroppingStyle = TOCropViewCroppingStyle
 
+/**
+ The type of cropping interface and grid style for this view controller*/
 public typealias CropViewInterfaceStyle = ToCropViewInterfaceStyle
 // ------------------------------------------------
 /// @name Delegate
