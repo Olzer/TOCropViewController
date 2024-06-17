@@ -122,8 +122,8 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
     
     BOOL circularMode = (self.croppingStyle == TOCropViewCroppingStyleCircular);
     
-    //Chek if interface mode is cucstomInterfaceMode
-    self.interfaceStyle = (self.interfaceStyle == ToCropViewInterfaceStyleCustom);
+    //Check if interface mode is cucstomInterfaceMode
+    _interfaceStyle = self.interfaceStyle;
     
     //Layout the views initially
     self.cropView.frame = [self frameForCropViewWithVerticalLayout:self.verticalLayout];
