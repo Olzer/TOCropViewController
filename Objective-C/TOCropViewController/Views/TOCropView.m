@@ -30,6 +30,7 @@
 static const CGFloat kTOCropViewPadding = 14.0f;
 static const NSTimeInterval kTOCropTimerDuration = 0.8f;
 static const CGFloat kTOCropViewMinimumBoxSize = 42.0f;
+static const CGfloat kTOCropViewCustomMinumumBoxSize = 140.0f;
 static const CGFloat kTOMaximumZoomScale = 15.0f;
 
 /* When the user taps down to resize the box, this state is used
@@ -1005,8 +1006,8 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
     cropBoxFrame.size.height = floorf(MIN(cropBoxFrame.size.height, maxHeight));
     
     //Make sure we can't make the crop box too small
-    cropBoxFrame.size.width  = MAX(cropBoxFrame.size.width, kTOCropViewMinimumBoxSize);
-    cropBoxFrame.size.height = MAX(cropBoxFrame.size.height, kTOCropViewMinimumBoxSize);
+    cropBoxFrame.size.width  = MAX(cropBoxFrame.size.width, _interfaceStyle ? kTOCropViewCustomMinumumBoxSize: kTOCropViewMinimumBoxSize);
+    cropBoxFrame.size.height = MAX(cropBoxFrame.size.height, _interfaceStyle ? kTOCropViewCustomMinumumBoxSize : kTOCropViewMinimumBoxSize);
     
     _cropBoxFrame = cropBoxFrame;
     
@@ -1014,7 +1015,7 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
     self.foregroundContainerView.frame = _cropBoxFrame;
 
     // Set the new overlay view to match the same region, but with 30 points spacing
-    CGRect gridOverlayFrame = _interfaceStyle ? CGRectInset(_cropBoxFrame, 30, 20) : _cropBoxFrame;
+    CGRect gridOverlayFrame = _cropBoxFrame;
     self.gridOverlayView.frame = gridOverlayFrame;
 
     // If the mask layer is present, adjust its transform to fit the new container view size
